@@ -1,11 +1,30 @@
 using Microsoft.AspNetCore.ResponseCompression;
+using gamershop.Server.Data;
+using gamershop.Server.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using gamershop.Server.Services.Interface;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddControllers();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+// Connection with DB
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString")));
+
+
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddRazorPages();
+
 
 var app = builder.Build();
 
@@ -17,7 +36,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
