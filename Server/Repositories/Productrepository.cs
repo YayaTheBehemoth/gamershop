@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using gamershop.Server.Database;
+using gamershop.Server.Services.Interface;
 
 namespace gamershop.Server.Repositories
 {
-    public class ProductRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly DbConnectionFactory _connectionFactory;
 
