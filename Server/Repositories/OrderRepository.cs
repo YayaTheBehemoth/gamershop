@@ -1,12 +1,11 @@
-namespace gamershop.Server.Repositories;
 using System;
-using gamershop.Server.Database;
 using System.Threading.Tasks;
-using gamershop.Shared.Models;
 using Dapper;
+using gamershop.Server.Database;
+using gamershop.Shared.Models;
 
-
-
+namespace gamershop.Server.Repositories
+{
     public class OrderRepository
     {
         private readonly DbConnectionFactory _connectionFactory;
@@ -24,22 +23,16 @@ using Dapper;
                 {
                     try
                     {
-                        // Insert order into database
-                        await connection.ExecuteAsync(
-                            "INSERT INTO Orders (CustomerId) VALUES (@CustomerId)",
+                        // Insert order into database and retrieve the generated OrderId
+                        var orderId = await connection.ExecuteScalarAsync<int>(
+                            "INSERT INTO Orders (CustomerId) VALUES (@CustomerId) RETURNING Id",
                             new { order.CustomerId },
                             transaction);
 
-                        // Insert order items into database
-                        foreach (var product in order.Items)
-                        {
-                            await connection.ExecuteAsync(
-                                "INSERT INTO OrderItems (OrderId, ProductId) VALUES (@OrderId, @ProductId)",
-                                new { OrderId = order.OrderId, ProductId = product.ProductId },
-                                transaction);
-                        }
+                        // Associate the generated OrderId with the order object
+                        order.OrderId = orderId;
 
-                        // Commit transaction
+                        // Commit the first transaction to persist the order
                         await transaction.CommitAsync();
                     }
                     catch (Exception)
@@ -50,6 +43,49 @@ using Dapper;
                     }
                 }
             }
+
+            try
+            {
+                // Insert order items into a new transaction
+                using (var connection = _connectionFactory.CreateConnection())
+                {
+                    using (var transaction = await connection.BeginTransactionAsync())
+                    {
+                        try
+                        {
+                            // Insert order items into database
+                            foreach (var product in order.Items)
+                            {
+                                await connection.ExecuteAsync(
+                                    "INSERT INTO Orderproduct (OrderId, ProductId) VALUES (@OrderId, @ProductId)",
+                                    new { order.OrderId, product.ProductId },
+                                    transaction);
+                            }
+
+                            // Commit the second transaction
+                            await transaction.CommitAsync();
+                        }
+                        catch (Exception)
+                        {
+                            // Rollback transaction on failure
+                            await transaction.RollbackAsync();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // If an exception occurs while inserting order products, roll back the previous order insertion
+                using (var connection = _connectionFactory.CreateConnection())
+                {
+                    using (var transaction = await connection.BeginTransactionAsync())
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                }
+                throw;
+            }
         }
     }
-
+}

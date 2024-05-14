@@ -1,4 +1,4 @@
-namespace gamershop.Server.Repositories;
+
 using System;
 
 using System.Threading.Tasks;
@@ -6,7 +6,7 @@ using gamershop.Shared.Models;
 
 using gamershop.Server.Database;
 using Dapper;
-
+namespace gamershop.Server.Repositories;
 public class TransactionRepository
     {
         private readonly DbConnectionFactory _connectionFactory;
@@ -26,7 +26,7 @@ public class TransactionRepository
                     {
                         // Insert transaction into database
                         await connection.ExecuteAsync(
-                            "INSERT INTO Transactions (OrderId, Amount, Date) VALUES (@OrderId, @Amount, @Date)",
+                            "INSERT INTO Transaction (OrderId, Amount, TransactionDate) VALUES (@OrderId, @Amount, @Date)",
                             new { transaction.OrderId, transaction.Amount, transaction.Date },
                             transactionScope);
 
