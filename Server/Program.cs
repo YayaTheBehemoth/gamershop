@@ -1,4 +1,6 @@
 using gamershop.Server.Database;
+using gamershop.Server.Repositories;
+using gamershop.Server.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +14,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 //Add DBfa
 builder.Services.AddSingleton<DbConnectionFactory>();
+// Add repositories
+builder.Services.AddScoped<OrderRepository>();
+builder.Services.AddScoped<TransactionRepository>();
+// Add other repositories if needed
+
+// Add services
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<TransactionService>();
 // Add Swagger
 builder.Services.AddSwaggerGen(c =>
 {
