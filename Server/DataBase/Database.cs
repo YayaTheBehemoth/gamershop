@@ -10,7 +10,7 @@ public class DbConnectionFactory
 
     public DbConnectionFactory(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("ConnectionString");
+        _connectionString = configuration.GetConnectionString("DefaultConnection");
         
         if (_connectionString == null)
         {
