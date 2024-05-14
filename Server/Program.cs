@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.ResponseCompression;
-using gamershop.Server.Data;
+
 using gamershop.Server.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<IProductService, ProductService>();
 
-// Connection with DB
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString")));
+
+
 
 
 builder.Services.AddControllersWithViews();

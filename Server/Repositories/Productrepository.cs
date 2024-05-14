@@ -1,26 +1,25 @@
-﻿using gamershop.Shared.Models;
+using gamershop.Shared.Models;
 using Npgsql;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
-using gamershop.Server.Services.Interface;
+using gamershop.Server.Database;
 
-namespace gamershop.Server.Services
+namespace gamershop.Server.Repositories
 {
-    public class ProductService : IProductService
+    public class ProductRepository
     {
-        private readonly string _connectionString;
+        private readonly DbConnectionFactory _connectionFactory;
 
-        public ProductService(IConfiguration configuration)
+        public ProductRepository(DbConnectionFactory connectionFactory)
         {
-            _connectionString = configuration.GetConnectionString("ConnectionString");
+            _connectionFactory = connectionFactory;
         }
-
 
         // GET all products query
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = _connectionFactory.CreateConnection())
             {
                 var products = await connection.QueryAsync<Product>("SELECT * FROM Products");
                 return products;
@@ -30,9 +29,9 @@ namespace gamershop.Server.Services
         // Get product by id query
         public async Task<Product> GetProductByIdAsync(string productId)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = _connectionFactory.CreateConnection())
             {
-                var product = await connection.QueryFirstOrDefaultAsync<Product>("SELECT * FROM Products WHERE ProductId = @ProductId", new { ProductId = productId});
+                var product = await connection.QueryFirstOrDefaultAsync<Product>("SELECT * FROM Products WHERE ProductId = @ProductId", new { ProductId = productId });
                 return product;
             }
         }
@@ -40,9 +39,9 @@ namespace gamershop.Server.Services
         // Add product query
         public async Task AddProductAsync(Product product)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = _connectionFactory.CreateConnection())
             {
-                var sql = "INSERT INTO Products (ProductId, ProductName, Price, Description, Category) VALUES (@ProductId, @ProductName, @Price, @Description, @Category)";
+                var sql = "INSERT INTO Products (ProductId, ProductName, Price, Description, CategoryId) VALUES (@ProductId, @ProductName, @Price, @Description, @CategoryId)";
                 await connection.ExecuteAsync(sql, product);
             }
         }
@@ -50,9 +49,9 @@ namespace gamershop.Server.Services
         // Update product query
         public async Task UpdateProductAsync(Product product)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = _connectionFactory.CreateConnection())
             {
-                var sql = "UPDATE Products SET ProductName = @ProductName, Price = @Price, Description = @Description, Category = @Category WHERE ProductId = @ProductId";
+                var sql = "UPDATE Products SET ProductName = @ProductName, Price = @Price, Description = @Description, CategoryId = @CategoryId WHERE ProductId = @ProductId";
                 await connection.ExecuteAsync(sql, product);
             }
         }
@@ -60,14 +59,11 @@ namespace gamershop.Server.Services
         // Delete product query
         public async Task DeleteProductAsync(string productId)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = _connectionFactory.CreateConnection())
             {
                 var sql = "DELETE FROM Products WHERE ProductId = @ProductId";
                 await connection.ExecuteAsync(sql, new { ProductId = productId });
             }
         }
-
-
     }
 }
-

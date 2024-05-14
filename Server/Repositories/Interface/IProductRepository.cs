@@ -2,7 +2,7 @@
 
 namespace gamershop.Server.Services.Interface
 {
-    public interface IProductService
+    public interface IProductRepository
     {
         Task<IEnumerable<Product>> GetAllProductsAsync();
         Task<Product> GetProductByIdAsync(string productId);
