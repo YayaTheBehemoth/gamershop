@@ -16,12 +16,12 @@ namespace gamershop.Server.Services
             _messageQueue = messageQueue;
         }
 
-        public async void PlaceOrder(Customer customer, List<Product> products, string accountNumber)
+        public async void PlaceOrder(string firstName, string lastName, string email, List<Product> products, string accountNumber)
         {
             // Validate inputs
-            if (customer == null || products == null || products.Count == 0 || string.IsNullOrEmpty(accountNumber))
+            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(email) || products == null || products.Count == 0 || string.IsNullOrEmpty(accountNumber))
             {
-                throw new ArgumentException("Invalid customer, product list, or account number");
+                throw new ArgumentException("Invalid customer information, product list, or account number");
             }
 
             // Calculate total price
@@ -30,18 +30,17 @@ namespace gamershop.Server.Services
             // Create order
             var order = new Order
             {
-                CustomerId = customer.CustomerId,
                 Items = products
             };
+
+            // Insert order into repository
+            await _orderRepository.InsertOrder(order, firstName, lastName, email);
 
             // Enqueue order message with account number and total price
             _messageQueue.Enqueue((order, accountNumber, totalPrice));
 
-            // Save order to database
-            await _orderRepository.InsertOrder(order);
-
             // Log order placement
-            Console.WriteLine($"Order placed for customer {customer.FirstName} {customer.LastName}. Total: {totalPrice}");
+            Console.WriteLine($"Order placed for customer {firstName} {lastName}. Total: {totalPrice}");
         }
 
         private double CalculateTotalPrice(List<Product> products)

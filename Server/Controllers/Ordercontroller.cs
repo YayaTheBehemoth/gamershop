@@ -22,8 +22,8 @@ namespace gamershop.Server.Controllers
         {
             try
             {
-                // Assuming PlaceOrderRequest contains Customer and List<Product>
-                _orderService.PlaceOrder(request.Customer, request.Products, request.AccountNumber);
+                // Call the service with the new parameters
+                _orderService.PlaceOrder(request.FirstName, request.LastName, request.Email, request.Products, request.AccountNumber);
                 return Ok("Order placed successfully.");
             }
             catch (Exception ex)
@@ -36,7 +36,9 @@ namespace gamershop.Server.Controllers
     // Define a model for the request body
     public class PlaceOrderRequest
     {
-        public Customer Customer { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
         public List<Product> Products { get; set; }
         public string AccountNumber { get; set; }
     }
