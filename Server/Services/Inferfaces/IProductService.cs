@@ -1,4 +1,4 @@
-using gamershop.Repositories.DTOs;
+using gamershop.Shared.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

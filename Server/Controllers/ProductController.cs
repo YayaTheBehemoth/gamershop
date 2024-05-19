@@ -1,5 +1,5 @@
 ﻿using gamershop.Server.Services.Interfaces;
-using gamershop.Repositories.DTOs;
+using gamershop.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;

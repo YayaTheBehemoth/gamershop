@@ -1,5 +1,6 @@
 using gamershop.Server.Services;
 using gamershop.Shared.Models;
+using gamershop.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -34,12 +35,5 @@ namespace gamershop.Server.Controllers
     }
 
     // Define a model for the request body
-    public class PlaceOrderRequest
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public List<Product> Products { get; set; }
-        public string AccountNumber { get; set; }
-    }
+   
 }

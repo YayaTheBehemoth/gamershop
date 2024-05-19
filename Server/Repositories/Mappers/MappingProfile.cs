@@ -1,6 +1,6 @@
 // MappingProfile.cs
 using AutoMapper;
-using gamershop.Repositories.DTOs;
+using gamershop.Shared.DTOs;
 using gamershop.Shared.Models;
 
 public class MappingProfile : Profile

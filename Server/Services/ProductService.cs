@@ -1,7 +1,7 @@
 using AutoMapper;
 using gamershop.Server.Repositories.Interfaces;
 using gamershop.Server.Services.Interfaces;
-using gamershop.Repositories.DTOs;
+using gamershop.Shared.DTOs;
 using gamershop.Shared.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
