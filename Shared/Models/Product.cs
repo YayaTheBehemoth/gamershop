@@ -1,7 +1,7 @@
 namespace gamershop.Shared.Models;
 public class Product
 {
-    public string ProductId {get; set;}
+    public int ProductId {get; set;}
 
     public string ProductName {get; set;}
 
@@ -12,3 +12,6 @@ public class Product
     public ProductCategory Category{get; set;}
     
 }
+
+
+
