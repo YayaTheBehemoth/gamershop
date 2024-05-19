@@ -1,6 +1,6 @@
 using gamershop.Shared.Models;
 
-namespace gamershop.Server.Services.Interface
+namespace gamershop.Server.Repositories.Interfaces
 {
     public interface IProductRepository
     {
@@ -9,6 +9,8 @@ namespace gamershop.Server.Services.Interface
         Task AddProductAsync(Product product);
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int productId);
+
+        Task<IEnumerable<ProductCategory>> GetProductCategoriesAsync();
 
     }
 }

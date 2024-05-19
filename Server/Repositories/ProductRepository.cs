@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using gamershop.Server.Database;
-using gamershop.Server.Services.Interface;
+using gamershop.Server.Services.Interfaces;
+using gamershop.Server.Repositories.Interfaces;
 
 namespace gamershop.Server.Repositories
 {
@@ -49,7 +50,7 @@ namespace gamershop.Server.Repositories
                     product.ProductName,
                     product.Price,
                     product.Description,
-                    CategoryId = product.Category.CategoryId
+                    product.CategoryId
                 });
             }
         }
@@ -65,7 +66,7 @@ namespace gamershop.Server.Repositories
                     product.ProductName,
                     product.Price,
                     product.Description,
-                    CategoryId = product.Category.CategoryId,
+                    product.CategoryId,
                     product.ProductId
                 });
             }
@@ -78,6 +79,16 @@ namespace gamershop.Server.Repositories
             {
                 var sql = "DELETE FROM product WHERE productId = @productId";
                 await connection.ExecuteAsync(sql, new { ProductId = productId });
+            }
+        }
+
+        // Get all product categories query
+        public async Task<IEnumerable<ProductCategory>> GetProductCategoriesAsync()
+        {
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                var categories = await connection.QueryAsync<ProductCategory>("SELECT * FROM productcategory");
+                return categories;
             }
         }
     }

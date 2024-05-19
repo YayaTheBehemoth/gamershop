@@ -1,10 +1,9 @@
-﻿using gamershop.Server.Services.Interface;
-using gamershop.Shared.Models;
+﻿using gamershop.Server.Services.Interfaces;
+using gamershop.Repositories.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using gamershop.Server.Services;
-using gamershop.Server.Services.Interfaces;
+
 namespace gamershop.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -19,14 +18,14 @@ namespace gamershop.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProducts()
         {
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
-
+/*
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProductById(int id)
+        public async Task<ActionResult<ProductDTO>> GetProductById(int id)
         {
             var product = await _productService.GetProductByIdAsync(id);
             if (product == null)
@@ -35,23 +34,24 @@ namespace gamershop.Server.Controllers
             }
             return Ok(product);
         }
-
+*/
+/*
         [HttpPost]
-        public async Task<ActionResult> AddProduct([FromBody] Product product)
+        public async Task<ActionResult> AddProduct([FromBody] ProductDTO productDTO)
         {
-            await _productService.AddProductAsync(product);
-            return CreatedAtAction(nameof(GetProductById), new { id = product.ProductId }, product);
+            await _productService.AddProductAsync(productDTO);
+            return CreatedAtAction(nameof(GetProductById), new { id = productDTO.ProductId }, productDTO);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProduct(int id, [FromBody] Product product)
+        public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductDTO productDTO)
         {
-            if (id != product.ProductId)
+            if (id != productDTO.ProductId)
             {
                 return BadRequest();
             }
 
-            await _productService.UpdateProductAsync(product);
+            await _productService.UpdateProductAsync(productDTO);
             return NoContent();
         }
 
@@ -67,5 +67,7 @@ namespace gamershop.Server.Controllers
             await _productService.DeleteProductAsync(id);
             return NoContent();
         }
+        */
     }
+    
 }

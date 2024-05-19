@@ -1,7 +1,7 @@
 using gamershop.Server.Database;
 using gamershop.Server.Repositories;
 using gamershop.Server.Services;
-using gamershop.Server.Services.Interface;
+using gamershop.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,12 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using gamershop.Shared.Models;
-using gamershop.Server.Services.Interfaces;
-
+using gamershop.Server.Repositories.Interfaces;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
+
 // Add message queue
 builder.Services.AddSingleton<SimpleMessageQueue<(Order, string, double)>>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -30,17 +32,19 @@ builder.Services.AddSingleton<OrderRepository>();
 builder.Services.AddSingleton<PaymentRepository>();
 builder.Services.AddSingleton<TransactionRepository>();
 
-
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 // Add services
-
+builder.Services.AddSingleton<MappingProfile>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<IPaymentService, PaymentService>();
 builder.Services.AddHostedService<TransactionService>();
 
-
-//Register the product interface service
+// Register the product interface service
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
 // Add Swagger
 builder.Services.AddSwaggerGen(c =>
 {
