@@ -1,0 +1,86 @@
+@page "/placeorder"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using System.Text.Json
+@using gamershop.Shared.DTOs
+@using gamershop.Shared.Models
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
+
+<h3>Place Order</h3>
+
+<button @onclick="ToggleBasket">Toggle Basket</button>
+
+@if (showBasket)
+{
+    <Basket />
+}
+
+<EditForm Model="orderRequest" OnValidSubmit="PlaceOrder">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>First Name:</label>
+        <InputText @bind-Value="orderRequest.FirstName" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <InputText @bind-Value="orderRequest.LastName" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="orderRequest.Email" />
+    </div>
+    <div>
+        <label>Account Number:</label>
+        <InputText @bind-Value="orderRequest.AccountNumber" />
+    </div>
+
+    <h4>Products in Cart</h4>
+    <ul>
+        @foreach (var product in orderRequest.Products)
+        {
+            <li>@product.ProductName - @product.Price</li>
+        }
+    </ul>
+
+    <button type="submit">Place Order</button>
+</EditForm>
+
+@code {
+    private PlaceOrderRequest orderRequest = new PlaceOrderRequest();
+    private bool showBasket = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cartProducts = await GetCart();
+        orderRequest.Products = cartProducts.Select(p => new Product { ProductId = p.ProductId, ProductName = p.ProductName, Price = p.Price, Description = p.Description }).ToList();
+    }
+
+    private async Task<List<ProductDTO>> GetCart()
+    {
+        var cartJson = await localStorage.GetItemAsync<string>("cart");
+        return cartJson == null ? new List<ProductDTO>() : JsonSerializer.Deserialize<List<ProductDTO>>(cartJson);
+    }
+
+    private async Task PlaceOrder()
+    {
+        var response = await Http.PostAsJsonAsync("Order/PlaceOrder", orderRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            await localStorage.RemoveItemAsync("cart");
+            Navigation.NavigateTo("/success");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error placing order: {errorMessage}");
+        }
+    }
+
+    private void ToggleBasket()
+    {
+        showBasket = !showBasket;
+    }
+}

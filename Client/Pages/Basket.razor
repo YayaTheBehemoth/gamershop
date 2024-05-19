@@ -1,0 +1,40 @@
+@using System.Text.Json
+@using Blazored.LocalStorage
+@using gamershop.Shared.DTOs
+@inject ILocalStorageService localStorage
+@code {
+    private List<ProductDTO> cartProducts = new List<ProductDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        cartProducts = await GetCart();
+    }
+
+    private async Task<List<ProductDTO>> GetCart()
+    {
+        var cartJson = await localStorage.GetItemAsync<string>("cart");
+        return cartJson == null ? new List<ProductDTO>() : JsonSerializer.Deserialize<List<ProductDTO>>(cartJson);
+    }
+
+    private async Task RemoveFromCart(ProductDTO product)
+    {
+        cartProducts.Remove(product);
+        await SaveCart(cartProducts);
+    }
+
+    private async Task SaveCart(List<ProductDTO> cart)
+    {
+        await localStorage.SetItemAsync("cart", JsonSerializer.Serialize(cart));
+    }
+}
+
+<h4>Basket</h4>
+<ul>
+    @foreach (var product in cartProducts)
+    {
+        <li>
+            @product.ProductName - @product.Price
+            <button @onclick="() => RemoveFromCart(product)">Remove</button>
+        </li>
+    }
+</ul>
