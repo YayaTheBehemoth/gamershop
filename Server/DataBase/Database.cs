@@ -2,34 +2,37 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
 
-namespace gamershop.Server.Database;
-
-public class DbConnectionFactory
+namespace gamershop.Server.Database
 {
-    private readonly string _connectionString;
-
-    public DbConnectionFactory(IConfiguration configuration)
+    public class DbConnectionFactory
     {
-        _connectionString = configuration.GetConnectionString("ConnectionString");
+        private  string _connectionString;
+
         
-        if (_connectionString == null)
-        {
-            throw new InvalidOperationException("Database connection string is missing.");
-        }
-    }
 
-    public NpgsqlConnection CreateConnection()
-    {
-        try
+        public DbConnectionFactory(IConfiguration configuration)
         {
-            var connection = new NpgsqlConnection(_connectionString);
-            connection.Open();
-            return connection;
+            _connectionString = configuration.GetValue<string>("ConnectionString");
+      
+            if (_connectionString == null)
+            {
+                throw new InvalidOperationException("Database connection string is missing.");
+            }
         }
-        catch (Exception ex)
+
+        public NpgsqlConnection CreateConnection()
         {
-            Console.WriteLine($"Error creating database connection: {ex.Message}");
-            throw;
+            try
+            {
+                var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating database connection: {ex.Message}");
+                throw;
+            }
         }
     }
 }
