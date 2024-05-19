@@ -1,17 +1,37 @@
 using gamershop.Server.Database;
+using gamershop.Server.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using gamershop.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+// Add message queue
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-//Add DBfa
+
+
+// Add IConfiguration
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+
+// Add DB factory
 builder.Services.AddSingleton<DbConnectionFactory>();
+
+
+// Add repositories
+
+
+// Add services
+builder.Services.AddSingleton<UserService>();
+
+
 // Add Swagger
 builder.Services.AddSwaggerGen(c =>
 {
