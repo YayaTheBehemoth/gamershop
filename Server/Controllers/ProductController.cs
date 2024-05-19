@@ -1,36 +1,35 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using gamershop.Server.Services.Interface;
 using gamershop.Shared.Models;
-using gamershop.Server.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using gamershop.Server.Services.Interface;
-
+using gamershop.Server.Services;
+using gamershop.Server.Services.Interfaces;
 namespace gamershop.Server.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProductController : ControllerBase
     {
-      
-        private readonly IProductRepository _productRepository;
+        private readonly IProductService _productService;
 
-        public ProductController(IProductRepository productService)
+        public ProductController(IProductService productService)
         {
-            _productRepository = productService;
+            _productService = productService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
         {
-            var products = await _productRepository.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProductById(int id)
         {
-            var product = await _productRepository.GetProductByIdAsync(id);
-            if(product == null)
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
             {
                 return NotFound();
             }
@@ -38,40 +37,34 @@ namespace gamershop.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddProduct(Product product)
+        public async Task<ActionResult> AddProduct([FromBody] Product product)
         {
-            await _productRepository.AddProductAsync(product);
+            await _productService.AddProductAsync(product);
             return CreatedAtAction(nameof(GetProductById), new { id = product.ProductId }, product);
         }
 
-        [HttpPut]
-        public async Task<ActionResult> UpdateProduct(int id, Product product)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
-            if(id != product.ProductId)
+            if (id != product.ProductId)
             {
                 return BadRequest();
             }
 
-            var existingProduct = await _productRepository.GetProductByIdAsync(id);
-            if(existingProduct == null)
-            {
-                return NotFound();
-            }
-
-            await _productRepository.UpdateProductAsync(product);
+            await _productService.UpdateProductAsync(product);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
-            var existingProduct = await _productRepository.GetProductByIdAsync(id);
-            if(existingProduct == null)
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
             {
                 return NotFound();
             }
 
-            await _productRepository.DeleteProductAsync(id);
+            await _productService.DeleteProductAsync(id);
             return NoContent();
         }
     }
