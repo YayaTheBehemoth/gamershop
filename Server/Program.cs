@@ -1,6 +1,7 @@
 using gamershop.Server.Database;
 using gamershop.Server.Repositories;
 using gamershop.Server.Services;
+using gamershop.Server.Services.Interface;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using gamershop.Shared.Models;
 using gamershop.Server.Services.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 // Add message queue
@@ -37,6 +39,8 @@ builder.Services.AddSingleton<IPaymentService, PaymentService>();
 builder.Services.AddHostedService<TransactionService>();
 
 
+//Register the product interface service
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 // Add Swagger
 builder.Services.AddSwaggerGen(c =>
 {
