@@ -31,6 +31,7 @@ builder.Services.AddSingleton<DbConnectionFactory>();
 builder.Services.AddSingleton<OrderRepository>();
 builder.Services.AddSingleton<PaymentRepository>();
 builder.Services.AddSingleton<TransactionRepository>();
+builder.Services.AddSingleton<UserRepository>();
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<IPaymentService, PaymentService>();
 builder.Services.AddHostedService<TransactionService>();
+builder.Services.AddSingleton<UserService>();
 
 // Register the product interface service
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

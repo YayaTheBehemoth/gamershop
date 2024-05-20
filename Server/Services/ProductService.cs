@@ -3,10 +3,6 @@ using gamershop.Server.Repositories.Interfaces;
 using gamershop.Server.Services.Interfaces;
 using gamershop.Shared.DTOs;
 using gamershop.Shared.Models;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace gamershop.Server.Services
 {

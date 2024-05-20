@@ -1,8 +1,10 @@
-using System.Data.Common;
 using System.Security.Cryptography;
 using System.Text;
+using gamershop.Server.Repositories;
 using gamershop.Shared.Models;
-using Npgsql;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace gamershop.Server.Services;
 
@@ -12,12 +14,16 @@ public class UserService
     private const int _hashSize = 20;
     private const int _iterations = 10000;
 
-    private DbConnection _dbConnection;
+    private readonly UserRepository _userRepository;
+    private readonly string secretKey;
 
-    public UserService(DbConnection dbConnection)
+
+    public UserService(UserRepository userRepository, IConfiguration configuration)
     {
-        _dbConnection = dbConnection;
+        secretKey = configuration.GetValue<string>("SecretKey");
+        _userRepository = userRepository;
     }
+
 
     public async Task<HashedPassword> EncryptPassword(string password)
     {
@@ -44,6 +50,19 @@ public class UserService
         }
     }
 
+
+    public async Task StoreUser(string username, HashedPassword password)
+    {
+        User newUser = new User
+        {
+            UserName = username,
+            StoredPassword =  password
+        };
+
+        await _userRepository.InsertUser(newUser);
+    }
+
+
     public async Task<bool> CheckPassword(HashedPassword storedpassword, string password)
     {
         // Extract salt and hash from stored password
@@ -67,13 +86,29 @@ public class UserService
         }
     }
 
-    public async Task CreateUser(string userName, HashedPassword password)
+
+    public async Task<string> GenerateJWT(string username)
     {
-        string sql = "INSERT INTO users (username, password, salt) VALUES (@username, @password, @salt)";
-        using var cmd = new NpgsqlCommand(sql, _dbConnection as NpgsqlConnection);
-        cmd.Parameters.AddWithValue("username", userName);
-        cmd.Parameters.AddWithValue("password",  password.Password);
-        cmd.Parameters.AddWithValue("salt", password.Salt);
-        await cmd.ExecuteNonQueryAsync();
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, username)
+            }),
+            Expires = DateTime.UtcNow.AddMinutes(30),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        return tokenHandler.WriteToken(token);
+    }
+
+
+    public async Task<User> GetUser(string username)
+    {
+        return await _userRepository.GetUser(username);
     }
 }

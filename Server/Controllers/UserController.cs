@@ -1,5 +1,5 @@
-using gamershop.Server.Database;
 using gamershop.Server.Services;
+using gamershop.Shared.DTOs;
 using gamershop.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,17 +17,27 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    [Route("CreateUser")]
-    public async Task CreateUser([FromBody]Requestbody requestbody)
+    [Route("createuser")]
+    public async Task CreateUser([FromBody] UserDTO requestbody)
     {
         HashedPassword hashedPassword = await _userService.EncryptPassword(requestbody.Password);
 
-        await _userService.CreateUser(requestbody.Username, hashedPassword);
+        await _userService.StoreUser(requestbody.Username, hashedPassword);
     }
 
-    public class Requestbody
+    [HttpPost]
+    [Route("login")]
+    public async Task<IActionResult> Login([FromBody] UserDTO requestbody)
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        User storedUser = await _userService.GetUser(requestbody.Username);
+
+        bool passwordCheck = await _userService.CheckPassword(storedUser.StoredPassword, requestbody.Password);
+        if (passwordCheck == true)
+        {
+            var token = _userService.GenerateJWT(requestbody.Username);
+            return Ok(new { token });
+        }
+        
+        return Unauthorized();
     }
 }

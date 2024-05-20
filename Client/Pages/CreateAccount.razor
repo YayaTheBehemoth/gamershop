@@ -1,0 +1,48 @@
+@page "/createaccount"
+
+@using gamershop.Shared.DTOs
+@using gamershop.Shared.Models
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using System.Text.Json
+
+<PageTitle>Create Account</PageTitle>
+
+<h1>Create Account</h1>
+
+<EditForm Model="userRequest" OnValidSubmit="SubmitAccountCreation">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Username:</label>
+        <InputText @bind-Value="userRequest.Username" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <InputText id="password" type="password" @bind-Value="userRequest.Password" />
+    </div>
+    
+    <button type="submit">Create Account</button>
+
+</EditForm>
+
+@code {
+    UserDTO userRequest = new UserDTO();
+
+    private async Task SubmitAccountCreation()
+    {
+        var response = await Http.PostAsJsonAsync("user/createuser", userRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error placing order: {errorMessage}");
+        }
+    }
+}
