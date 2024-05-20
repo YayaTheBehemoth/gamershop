@@ -52,7 +52,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Configure the number of instances of OrderController
-const int numberOfOrderControllerInstances = 2;
+const int numberOfOrderControllerInstances = 5;
 
 // Register OrderControllerFactory
 builder.Services.AddSingleton<OrderControllerFactory>(sp =>
@@ -87,11 +87,45 @@ app.MapRazorPages();
 var orderControllerFactory = app.Services.GetRequiredService<OrderControllerFactory>();
 for (int i = 0; i < numberOfOrderControllerInstances; i++)
 {
-    app.UseEndpoints(endpoints =>
+    var controllerInstance = orderControllerFactory.GetNextInstance();
+    var routePrefix = $"/order/{i + 1}"; // Example route prefix: /order/1, /order/2, etc.
+    
+    ConfigureOrderControllerRoutes(app, routePrefix, controllerInstance);
+}
+
+// Configure routes for other controllers
+ConfigureOtherControllerRoutes(app);
+
+// Fallback route
+app.MapFallbackToFile("index.html");
+
+app.Run();
+
+// Method to configure routes for OrderController instances
+ void ConfigureOrderControllerRoutes(IApplicationBuilder app, string routePrefix, OrderController controllerInstance)
+{
+    app.Map(routePrefix, builder =>
     {
-        endpoints.MapControllers().WithMetadata(orderControllerFactory.GetNextInstance());
+        builder.UseRouting();
+        builder.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers().RequireCors("AllowAll").WithMetadata(controllerInstance);
+        });
     });
 }
+
+// Method to configure routes for other controllers
+ void ConfigureOtherControllerRoutes(IApplicationBuilder app)
+{
+    // Configure routes for other controllers here
+      app.UseRouting();
+    app.UseEndpoints(endpoints =>
+    {
+        // Add endpoints for other controllers with default settings
+        endpoints.MapControllers();
+    });
+}
+
 
 app.MapFallbackToFile("index.html");
 
