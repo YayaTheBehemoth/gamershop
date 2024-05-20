@@ -1,9 +1,7 @@
-using gamershop.Server.Services;
-using gamershop.Shared.Models;
-using gamershop.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using gamershop.Server.Services;
+using gamershop.Shared.DTOs;
 using System;
-using System.Collections.Generic;
 
 namespace gamershop.Server.Controllers
 {
@@ -12,20 +10,44 @@ namespace gamershop.Server.Controllers
     public class OrderController : ControllerBase
     {
         private readonly OrderService _orderService;
+        public int InstanceId { get; private set; } // Property to hold the InstanceId
 
+        // Constructor without the InstanceId parameter
         public OrderController(OrderService orderService)
         {
             _orderService = orderService;
         }
 
-        [HttpPost("PlaceOrder")]
-        public IActionResult PlaceOrder([FromBody] PlaceOrderRequest request)
+        // Method to set the InstanceId
+        public void SetInstanceId(int instanceId)
+        {
+            InstanceId = instanceId;
+        }
+
+      [HttpPost("PlaceOrder/{instanceId}")]
+public IActionResult PlaceOrder(int instanceId, [FromBody] PlaceOrderRequest request)
+{
+    try
+    {
+        // Call the service with the new parameters
+        _orderService.PlaceOrder(request.FirstName, request.LastName, request.Email, request.Products, request.AccountNumber);
+
+        // Optionally, you can use the instanceId in your logic here
+
+        return Ok("Order placed successfully.");
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"An error occurred: {ex.Message}");
+    }
+}
+
+        [HttpGet("GetInstanceId")]
+        public IActionResult GetInstanceId()
         {
             try
             {
-                // Call the service with the new parameters
-                _orderService.PlaceOrder(request.FirstName, request.LastName, request.Email, request.Products, request.AccountNumber);
-                return Ok("Order placed successfully.");
+                return Ok(InstanceId);
             }
             catch (Exception ex)
             {
@@ -33,7 +55,4 @@ namespace gamershop.Server.Controllers
             }
         }
     }
-
-    // Define a model for the request body
-   
 }
