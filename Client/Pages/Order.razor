@@ -39,10 +39,15 @@
 
     <h4>Products in Cart</h4>
     <ul>
+     @if (orderRequest.Products != null)
+{
+    <ul>
         @foreach (var product in orderRequest.Products)
         {
             <li>@product.ProductName - @product.Price</li>
         }
+    </ul>
+}
     </ul>
 
     <button type="submit">Place Order</button>
@@ -51,31 +56,50 @@
 @code {
     private PlaceOrderRequest orderRequest = new PlaceOrderRequest();
     private bool showBasket = false;
-
-    protected override async Task OnInitializedAsync()
+   protected override async Task OnInitializedAsync()
     {
         var cartProducts = await GetCart();
         orderRequest.Products = cartProducts.Select(p => new Product { ProductId = p.ProductId, ProductName = p.ProductName, Price = p.Price, Description = p.Description }).ToList();
     }
-
-    private async Task<List<ProductDTO>> GetCart()
+        private async Task<List<ProductDTO>> GetCart()
     {
         var cartJson = await localStorage.GetItemAsync<string>("cart");
         return cartJson == null ? new List<ProductDTO>() : JsonSerializer.Deserialize<List<ProductDTO>>(cartJson);
     }
-
     private async Task PlaceOrder()
     {
-        var response = await Http.PostAsJsonAsync("Order/PlaceOrder", orderRequest);
+        try
+        {
+            var instanceId = await GetInstanceId(); // Determine the instance ID
+            var response = await Http.PostAsJsonAsync($"Order/PlaceOrder/{instanceId}", orderRequest);
+            if (response.IsSuccessStatusCode)
+            {
+                await localStorage.RemoveItemAsync("cart");
+                Navigation.NavigateTo("/success");
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error placing order: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+
+    private async Task<int> GetInstanceId()
+    {
+        var response = await Http.GetAsync("Order/GetInstanceId");
         if (response.IsSuccessStatusCode)
         {
-            await localStorage.RemoveItemAsync("cart");
-            Navigation.NavigateTo("/success");
+            var instanceId = await response.Content.ReadAsStringAsync();
+            return int.Parse(instanceId);
         }
         else
         {
-            var errorMessage = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Error placing order: {errorMessage}");
+            throw new Exception("Failed to retrieve instance ID.");
         }
     }
 
