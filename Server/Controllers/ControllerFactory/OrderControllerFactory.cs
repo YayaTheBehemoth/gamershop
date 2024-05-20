@@ -33,7 +33,7 @@ namespace gamershop.Server.Controllers
             for (int i = 0; i < numberOfInstances; i++)
             {
                 var orderController = new OrderController(orderService, logger);
-                orderController.SetInstanceId(i + 1); // Set the InstanceId
+                orderController.InstanceId = (i + 1); // Set the InstanceId
                 _orderControllers.Add(orderController);
             }
 

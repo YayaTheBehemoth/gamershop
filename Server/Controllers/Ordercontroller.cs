@@ -13,7 +13,7 @@ namespace gamershop.Server.Controllers
         private readonly OrderService _orderService;
         private readonly ILogger<OrderController> _logger; // Add ILogger<OrderController> field
 
-        public int InstanceId { get; private set; } // Property to hold the InstanceId
+        public int InstanceId { get;  set; } // Property to hold the InstanceId
 
         // Modify the constructor to inject ILogger<OrderController>
         public OrderController(OrderService orderService, ILogger<OrderController> logger)
@@ -23,10 +23,7 @@ namespace gamershop.Server.Controllers
         }
 
         // Method to set the InstanceId
-        public void SetInstanceId(int instanceId)
-        {
-            InstanceId = instanceId;
-        }
+      
 
         [HttpPost("PlaceOrder/{instanceId}")]
         public IActionResult PlaceOrder(int instanceId, [FromBody] PlaceOrderRequest request)
@@ -38,6 +35,8 @@ namespace gamershop.Server.Controllers
 
                 // Call the service with the new parameters
                 _orderService.PlaceOrder(request.FirstName, request.LastName, request.Email, request.Products, request.AccountNumber);
+                
+               
 
                 // Optionally, you can use the instanceId in your logic here
 
