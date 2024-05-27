@@ -1,0 +1,55 @@
+@page "/login"
+
+@using gamershop.Shared.DTOs
+@using gamershop.Shared.Models
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using System.Text.Json
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+<EditForm Model="loginRequest" OnValidSubmit="SubmitLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Username:</label>
+        <InputText @bind-Value="loginRequest.Username" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <InputText id="password" type="password" @bind-Value="loginRequest.Password" />
+    </div>
+
+    <button type="submit">Login</button>
+
+</EditForm>
+
+@code {
+    UserDTO loginRequest = new UserDTO();
+
+    private async Task SubmitLogin()
+    {
+        var response = await Http.PostAsJsonAsync("user/login", loginRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            var responseData = await response.Content.ReadAsStringAsync();
+
+            var jsonDocument = JsonDocument.Parse(responseData);
+            var tokenElement = jsonDocument.RootElement.GetProperty("token").GetProperty("result");
+            var jwtToken = tokenElement.GetString();
+
+            await localStorage.SetItemAsync("jwttoken", jwtToken);
+            Navigation.NavigateTo("/products");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error placing order: {errorMessage}");
+        }
+    }
+}
