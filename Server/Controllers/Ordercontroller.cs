@@ -1,9 +1,8 @@
-using gamershop.Server.Services;
-using gamershop.Shared.Models;
-using gamershop.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging; // Add this namespace
+using gamershop.Server.Services;
+using gamershop.Shared.DTOs;
 using System;
-using System.Collections.Generic;
 
 namespace gamershop.Server.Controllers
 {
@@ -12,19 +11,35 @@ namespace gamershop.Server.Controllers
     public class OrderController : ControllerBase
     {
         private readonly OrderService _orderService;
+        private readonly ILogger<OrderController> _logger; // Add ILogger<OrderController> field
 
-        public OrderController(OrderService orderService)
+        public int InstanceId { get;  set; } // Property to hold the InstanceId
+
+        // Modify the constructor to inject ILogger<OrderController>
+        public OrderController(OrderService orderService, ILogger<OrderController> logger)
         {
             _orderService = orderService;
+            _logger = logger;
         }
 
-        [HttpPost("PlaceOrder")]
-        public IActionResult PlaceOrder([FromBody] PlaceOrderRequest request)
+        // Method to set the InstanceId
+      
+
+        [HttpPost("PlaceOrder/{instanceId}")]
+        public IActionResult PlaceOrder(int instanceId, [FromBody] PlaceOrderRequest request)
         {
             try
             {
+                // Log the instance being used
+                _logger.LogInformation($"Processing order on instance {instanceId}");
+
                 // Call the service with the new parameters
                 _orderService.PlaceOrder(request.FirstName, request.LastName, request.Email, request.Products, request.AccountNumber);
+                
+               
+
+                // Optionally, you can use the instanceId in your logic here
+
                 return Ok("Order placed successfully.");
             }
             catch (Exception ex)
@@ -32,8 +47,18 @@ namespace gamershop.Server.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-    }
 
-    // Define a model for the request body
-   
+        [HttpGet("GetInstanceId")]
+        public IActionResult GetInstanceId()
+        {
+            try
+            {
+                return Ok(InstanceId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+    }
 }
